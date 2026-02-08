@@ -17,97 +17,138 @@ A CLI task manager that stores tasks in human-editable markdown files. Manage yo
 npm install -g @ziao/markit
 ```
 
+After installation, you can use either `markit` or the shorter `mi` command:
+
+```bash
+markit init
+# or
+mi init
+```
+
 Or use locally in your project:
 
 ```bash
 npm install @ziao/markit
 npx markit init
+# or
+npx mi init
 ```
 
 ## Quick Start
 
 ```bash
 # Initialize a new task file
-markit init
+mi init
 
 # Add a task
-markit add "Fix login bug"
+mi a "Fix login bug"
 
 # List all tasks
-markit list
+mi l
 
 # Move task to progress
-markit move 001 progress
+mi p 001
 
 # Mark as done
-markit done 001
+mi d 001
 
 # Or mark as wontdo
-markit wontdo 002
+mi w 002
 ```
+
+> **Tip**: Use `mi` instead of `markit` for faster typing. All examples work with both `markit` and `mi`.
 
 ## Commands
 
-### `markit init [-f <file>]`
+All commands have single-letter aliases for faster typing.
+
+### `markit init [-f <file>]` (alias: `i`)
 
 Create a new task file with fixed sections.
 
 ```bash
 markit init
-markit init -f work.md
+markit i -f work.md
 ```
 
-### `markit add "description" [-f <file>]`
+### `markit add "description" [-f <file>]` (alias: `a`)
 
 Add a new task to the backlog section.
 
 ```bash
 markit add "Fix login bug"
-markit add "Write tests" -f work.md
+markit a "Write tests" -f work.md
 ```
 
-### `markit list [section] [-f <file>]`
+### `markit list [filter] [-f <file>]` (alias: `l`)
 
-List tasks, optionally filtered by section.
+List tasks, optionally filtered by section or tag.
 
 ```bash
 markit list                    # All tasks
-markit list backlog            # Only backlog
-markit list progress -f work.md
+markit l backlog              # Only backlog section
+markit l #urgent              # Tasks with #urgent tag
+markit l progress -f work.md  # Progress section in work.md
+markit l #bug -f work.md      # Tasks with #bug tag in work.md
 ```
 
-### `markit move <id> <section> [-f <file>]`
+### `markit move <id> <section> [-f <file>]` (alias: `m`)
 
 Move a task between sections (backlog, todo, progress, closed).
 
 ```bash
 markit move 001 todo
-markit move 001 progress
+markit m 001 progress
 ```
 
-### `markit done <id> [-f <file>]`
+### `markit progress <id> [-f <file>]` (alias: `p`)
+
+Move a task to progress section (shortcut for `move <id> progress`).
+
+```bash
+markit progress 001
+markit p 001 -f work.md
+```
+
+### `markit done <id> [-f <file>]` (alias: `d`)
 
 Mark a task as done (moves to closed with checkbox [x]).
 
 ```bash
 markit done 001
-markit done #001              # # prefix optional
+markit d #001              # # prefix optional
 ```
 
-### `markit wontdo <id> [-f <file>]`
+### `markit wontdo <id> [-f <file>]` (alias: `w`)
 
 Mark a task as wontdo (moves to closed with checkbox [ ]).
 
 ```bash
 markit wontdo 002
+markit w 002
 ```
 
-### `markit remove <id> [-f <file>]`
+### `markit remove <id> [-f <file>]` (alias: `r`)
 
 Remove a task from the file.
 
 ```bash
 markit remove 001
+markit r 001
+```
+
+### `markit sync [-f <file>]` (alias: `s`)
+
+Sync manually edited tasks. This command:
+- Assigns IDs to tasks without IDs
+- Moves checked tasks in progress/backlog/todo to done
+- Adds checkboxes to tasks that don't have them
+
+Useful after manually editing the markdown file.
+
+```bash
+markit sync
+markit s -f work.md
 ```
 
 ## Task File Format
@@ -118,18 +159,18 @@ Tasks are stored in markdown files with fixed sections:
 # Tasks
 
 ## backlog
-- [ ] id:#001 Fix login bug #bug #urgent @john due:2025-01-15
-- [ ] id:#002 Write API documentation #docs
+- [ ] id:001 Fix login bug #bug #urgent @john due:2025-01-15
+- [ ] id:002 Write API documentation #docs
 
 ## todo
-- [ ] id:#003 Add dark mode #feature
+- [ ] id:003 Add dark mode #feature
 
 ## progress
-- [ ] id:#004 Refactor auth module #refactor
+- [ ] id:004 Refactor auth module #refactor
 
 ## closed
-- [x] id:#005 Setup CI/CD pipeline #devops _done:2025-01-10
-- [ ] id:#006 Old feature idea #feature
+- [x] id:005 Setup CI/CD pipeline #devops _done:2025-01-10
+- [ ] id:006 Old feature idea #feature
 ```
 
 ### Sections
@@ -143,9 +184,10 @@ Tasks are stored in markdown files with fixed sections:
 
 ### Task IDs
 
-- Sequential numbering: #001, #002, #003, etc.
+- Sequential numbering: 001, 002, 003, etc.
+- Stored in file as: `id:001`, `id:002`, `id:003`
 - IDs are never reused (even if tasks are deleted)
-- CLI accepts: `001`, `#001`, or `1` (all work)
+- CLI accepts: `001`, `#001`, or `1` (all work - the # is optional for convenience)
 
 ### Metadata
 
@@ -176,23 +218,23 @@ markit init
 
 # 2. Add tasks
 markit add "Fix login bug"
-markit add "Write tests"
-markit add "Update docs"
+markit a "Write tests"
+markit a "Update docs"
 
 # 3. Move to todo (ready to work on)
-markit move 001 todo
+markit m 001 todo
 
 # 4. Start working (move to progress)
-markit move 001 progress
+markit p 001
 
 # 5. Complete it
-markit done 001
+markit d 001
 
 # 6. Cancel a task
-markit wontdo 003
+markit w 003
 
 # 7. View status
-markit list
+markit l
 ```
 
 ## Development
@@ -204,14 +246,79 @@ npm install
 # Build
 npm run build
 
+# Watch mode - rebuilds automatically on file changes
+npm run dev
+
 # Run tests
 npm test
 
 # Run tests with coverage
 npm run test:coverage
 
-# Watch mode
+# Watch mode for tests
 npm run test:watch
+```
+
+### Commit Messages
+
+This project uses [Conventional Commits](https://www.conventionalcommits.org/) enforced by commitlint. Commit messages must follow this format:
+
+```
+<type>: <description>
+
+[optional body]
+
+[optional footer]
+```
+
+**Types:**
+- `feat`: New feature
+- `fix`: Bug fix
+- `docs`: Documentation changes
+- `style`: Code style changes (formatting, etc.)
+- `refactor`: Code refactoring
+- `perf`: Performance improvements
+- `test`: Adding or updating tests
+- `build`: Build system changes
+- `ci`: CI/CD changes
+- `chore`: Other changes that don't modify src or test files
+- `revert`: Revert a previous commit
+
+**Examples:**
+```bash
+git commit -m "feat: add progress command shortcut"
+git commit -m "fix: handle tasks without IDs in sync"
+git commit -m "docs: update README with aliases"
+```
+
+### Version Bumping
+
+This project uses `standard-version` to automatically bump version numbers based on conventional commits:
+
+- `feat:` commits → **minor** version bump (0.1.0 → 0.2.0)
+- `fix:` commits → **patch** version bump (0.1.0 → 0.1.1)
+- `BREAKING CHANGE:` or `feat!:` → **major** version bump (0.1.0 → 1.0.0)
+
+**Release workflow:**
+```bash
+# Automatic version bump based on commits since last release
+npm run release
+
+# Or manually specify version type
+npm run release:patch   # 0.1.0 → 0.1.1
+npm run release:minor   # 0.1.0 → 0.2.0
+npm run release:major   # 0.1.0 → 1.0.0
+```
+
+This will:
+1. Bump version in `package.json`
+2. Generate/update `CHANGELOG.md` from commit history
+3. Create a git tag
+4. Commit the changes
+
+After running `npm run release`, push with tags:
+```bash
+git push --follow-tags
 ```
 
 ## Architecture
