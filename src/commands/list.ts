@@ -5,90 +5,117 @@ import { Section, FIXED_SECTIONS } from '../lib/core/task.js';
 import { formatId } from '../lib/utils/id-generator.js';
 
 export function listCommand(): Command {
-    const command = new Command('list');
+  const command = new Command('list');
 
-    command
-        .alias('l')
-        .description('List tasks, optionally filtered by section')
-        .argument('[section]', 'section to filter by (backlog, todo, progress, closed)')
-        .option('-f, --file <file>', 'specify task file (default: TODO.md)')
-        .action(async (section, options) => {
-            try {
-                const filePath = options.file;
-                const sectionFilter = section ? (section.toLowerCase() as Section) : undefined;
+  command
+    .alias('l')
+    .description('List tasks, optionally filtered by section, tag, or mention')
+    .argument(
+      '[filter]',
+      'section (backlog, todo, progress, closed), tag (#tag), or mention (@user) to filter by'
+    )
+    .option('-f, --file <file>', 'specify task file (default: TODO.md)')
+    .action(async (filter, options) => {
+      try {
+        const filePath = options.file;
+        let sectionFilter: Section | undefined;
+        let tagFilter: string | undefined;
+        let mentionFilter: string | undefined;
 
-                if (sectionFilter && !FIXED_SECTIONS.includes(sectionFilter)) {
-                    console.error(chalk.red(`Invalid section: ${section}. Valid sections: ${FIXED_SECTIONS.join(', ')}`));
-                    process.exit(1);
-                    return;
-                }
-
-                const tasks = await listTasks(filePath, sectionFilter);
-
-                if (tasks.length === 0) {
-                    if (sectionFilter) {
-                        console.log(chalk.yellow(`No tasks in ${sectionFilter} section`));
-                    } else {
-                        console.log(chalk.yellow('No tasks found'));
-                    }
-                    return;
-                }
-
-                // Group by section if no filter
-                if (!sectionFilter) {
-                    for (const section of FIXED_SECTIONS) {
-                        const sectionTasks = tasks.filter(t => t.section === section);
-                        if (sectionTasks.length > 0) {
-                            console.log(chalk.bold(`\n## ${section}`));
-                            for (const task of sectionTasks) {
-                                printTask(task);
-                            }
-                        }
-                    }
-                } else {
-                    // Single section
-                    console.log(chalk.bold(`\n## ${sectionFilter}`));
-                    for (const task of tasks) {
-                        printTask(task);
-                    }
-                }
-            } catch (error: any) {
-                console.error(chalk.red(`Error: ${error.message}`));
-                process.exit(1);
+        if (filter) {
+          if (filter.startsWith('#')) {
+            // Tag filter: #urgent
+            tagFilter = filter.slice(1);
+          } else if (filter.startsWith('@')) {
+            // Mention filter: @ziao
+            mentionFilter = filter.slice(1);
+          } else {
+            // Section filter
+            const section = filter.toLowerCase() as Section;
+            if (!FIXED_SECTIONS.includes(section)) {
+              console.error(
+                chalk.red(
+                  `Invalid section: ${filter}. Valid sections: ${FIXED_SECTIONS.join(', ')}`
+                )
+              );
+              process.exit(1);
+              return;
             }
-        });
+            sectionFilter = section;
+          }
+        }
 
-    return command;
+        const tasks = await listTasks(filePath, sectionFilter, tagFilter, mentionFilter);
+
+        if (tasks.length === 0) {
+          if (tagFilter) {
+            console.log(chalk.yellow(`No tasks found with tag #${tagFilter}`));
+          } else if (mentionFilter) {
+            console.log(chalk.yellow(`No tasks found mentioning @${mentionFilter}`));
+          } else if (sectionFilter) {
+            console.log(chalk.yellow(`No tasks in ${sectionFilter} section`));
+          } else {
+            console.log(chalk.yellow('No tasks found'));
+          }
+          return;
+        }
+
+        // Group by section if no section filter (but tag filter may be active)
+        if (!sectionFilter) {
+          for (const section of FIXED_SECTIONS) {
+            const sectionTasks = tasks.filter((t) => t.section === section);
+            if (sectionTasks.length > 0) {
+              console.log(chalk.bold(`\n## ${section}`));
+              for (const task of sectionTasks) {
+                printTask(task);
+              }
+            }
+          }
+        } else {
+          // Single section
+          console.log(chalk.bold(`\n## ${sectionFilter}`));
+          for (const task of tasks) {
+            printTask(task);
+          }
+        }
+      } catch (error: any) {
+        console.error(chalk.red(`Error: ${error.message}`));
+        process.exit(1);
+      }
+    });
+
+  return command;
 }
 
 function printTask(task: any) {
-    const id = formatId(task.idNumber);
-    const checkbox = task.checked ? chalk.green('[x]') : chalk.gray('[ ]');
-    const status = task.section === 'closed'
-        ? (task.checked ? chalk.green('DONE') : chalk.yellow('WONTDO'))
-        : '';
+  const id = formatId(task.idNumber);
+  const checkbox = task.checked ? chalk.green('[x]') : chalk.gray('[ ]');
+  const status =
+    task.section === 'closed' ? (task.checked ? chalk.green('DONE') : chalk.yellow('WONTDO')) : '';
 
-    let line = `  ${checkbox} ${chalk.bold(id)} ${task.description}`;
+  // Color tags inline in description
+  let description = task.description;
+  for (const tag of task.tags) {
+    const tagPattern = new RegExp(`#${tag}\\b`, 'g');
+    description = description.replace(tagPattern, chalk.blue(`#${tag}`));
+  }
 
-    if (task.tags.length > 0) {
-        line += ' ' + task.tags.map((t: string) => chalk.blue(`#${t}`)).join(' ');
-    }
+  // Color mentions inline in description
+  for (const mention of task.mentions) {
+    const mentionPattern = new RegExp(`@${mention}\\b`, 'g');
+    description = description.replace(mentionPattern, chalk.cyan(`@${mention}`));
+  }
 
-    if (task.mentions.length > 0) {
-        line += ' ' + task.mentions.map((m: string) => chalk.cyan(`@${m}`)).join(' ');
-    }
+  let line = `  ${checkbox} ${chalk.bold(id)} ${description}`;
 
-    if (task.dueDate) {
-        line += ' ' + chalk.magenta(`due:${task.dueDate}`);
-    }
+  // Add due date after description (mentions already colored inline)
+  if (task.dueDate) {
+    line += ' ' + chalk.magenta(`due:${task.dueDate}`);
+  }
 
-    if (task.doneDate) {
-        line += ' ' + chalk.gray(`_done:${task.doneDate}`);
-    }
+  if (status) {
+    line += ' ' + status;
+  }
 
-    if (status) {
-        line += ' ' + status;
-    }
-
-    console.log(line);
+  console.log(line);
 }
