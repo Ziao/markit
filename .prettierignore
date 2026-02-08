@@ -1,0 +1,9 @@
+node_modules/
+dist/
+coverage/
+*.md
+!README.md
+.prettierrc.json
+.versionrc.json
+commitlint.config.*
+.husky/
