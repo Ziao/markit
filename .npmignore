@@ -13,6 +13,9 @@ SPEC.md
 DECISIONS.md
 COMMAND_EXAMPLES.md
 
+# Version control
+.versionrc.json
+
 # Development files
 TODO.md
 .vscode/
