@@ -8,6 +8,7 @@ export function listCommand(): Command {
     const command = new Command('list');
 
     command
+        .alias('l')
         .description('List tasks, optionally filtered by section')
         .argument('[section]', 'section to filter by (backlog, todo, progress, closed)')
         .option('-f, --file <file>', 'specify task file (default: TODO.md)')

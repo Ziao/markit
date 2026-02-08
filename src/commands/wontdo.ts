@@ -7,6 +7,7 @@ export function wontdoCommand(): Command {
   const command = new Command('wontdo');
 
   command
+    .alias('w')
     .description('Mark a task as wontdo (moves to closed section)')
     .argument('<id>', 'task ID (001, #001, or 1)')
     .option('-f, --file <file>', 'specify task file (default: TODO.md)')

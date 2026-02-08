@@ -7,6 +7,7 @@ export function progressCommand(): Command {
     const command = new Command('progress');
 
     command
+        .alias('p')
         .description('Move a task to progress section (shortcut for: move <id> progress)')
         .argument('<id>', 'task ID (001, #001, or 1)')
         .option('-f, --file <file>', 'specify task file (default: TODO.md)')

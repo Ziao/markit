@@ -7,6 +7,7 @@ export function moveCommand(): Command {
   const command = new Command('move');
 
   command
+    .alias('m')
     .description('Move a task to a different section')
     .argument('<id>', 'task ID (001, #001, or 1)')
     .argument('<section>', 'target section (backlog, todo, progress, closed)')

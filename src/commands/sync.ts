@@ -9,6 +9,7 @@ export function syncCommand(): Command {
   const command = new Command('sync');
 
   command
+    .alias('s')
     .description('Sync manually edited tasks (assigns IDs to tasks without IDs, moves checked tasks to done)')
     .option('-f, --file <file>', 'specify task file (default: TODO.md)')
     .action(async (options) => {

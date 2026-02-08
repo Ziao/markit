@@ -7,6 +7,7 @@ export function addCommand(): Command {
   const command = new Command('add');
 
   command
+    .alias('a')
     .description('Add a new task to backlog')
     .argument('<description>', 'task description')
     .option('-f, --file <file>', 'specify task file (default: TODO.md)')

@@ -7,6 +7,7 @@ export function removeCommand(): Command {
     const command = new Command('remove');
 
     command
+        .alias('r')
         .description('Remove a task from the file')
         .argument('<id>', 'task ID (001, #001, or 1)')
         .option('-f, --file <file>', 'specify task file (default: TODO.md)')
