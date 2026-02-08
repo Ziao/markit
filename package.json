@@ -1,6 +1,6 @@
 {
   "name": "@ziao/markit",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "description": "A CLI task manager that stores tasks in markdown files",
   "type": "module",
   "main": "dist/index.js",
