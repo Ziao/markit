@@ -1,0 +1,159 @@
+import { describe, it, expect } from 'vitest';
+import { formatMarkdown, formatEmptyFile } from '../../src/lib/core/formatter.js';
+import { Task, TaskData } from '../../src/lib/core/task.js';
+
+describe('Formatter', () => {
+  it('should format empty file', () => {
+    const result = formatEmptyFile();
+    expect(result).toContain('# Tasks');
+    expect(result).toContain('## backlog');
+    expect(result).toContain('## todo');
+    expect(result).toContain('## progress');
+    expect(result).toContain('## closed');
+  });
+
+  it('should format single task', () => {
+    const task: Task = {
+      id: '001',
+      idNumber: 1,
+      description: 'Test task',
+      section: 'backlog',
+      checked: false,
+      tags: [],
+      mentions: [],
+    };
+
+    const data: TaskData = {
+      tasks: [task],
+      nextId: 2,
+    };
+
+    const result = formatMarkdown(data);
+    expect(result).toContain('- [ ] id:#001 Test task');
+    expect(result).toContain('## backlog');
+  });
+
+  it('should format task with metadata', () => {
+    const task: Task = {
+      id: '001',
+      idNumber: 1,
+      description: 'Fix bug',
+      section: 'backlog',
+      checked: false,
+      tags: ['bug', 'urgent'],
+      mentions: ['john'],
+      dueDate: '2025-01-15',
+    };
+
+    const data: TaskData = {
+      tasks: [task],
+      nextId: 2,
+    };
+
+    const result = formatMarkdown(data);
+    expect(result).toContain('id:#001 Fix bug #bug #urgent @john due:2025-01-15');
+  });
+
+  it('should format completed task with done date', () => {
+    const task: Task = {
+      id: '001',
+      idNumber: 1,
+      description: 'Completed task',
+      section: 'closed',
+      checked: true,
+      tags: [],
+      mentions: [],
+      doneDate: '2025-01-10',
+    };
+
+    const data: TaskData = {
+      tasks: [task],
+      nextId: 2,
+    };
+
+    const result = formatMarkdown(data);
+    expect(result).toContain('- [x] id:#001 Completed task _done:2025-01-10');
+  });
+
+  it('should maintain section order', () => {
+    const tasks: Task[] = [
+      {
+        id: '001',
+        idNumber: 1,
+        description: 'Task 1',
+        section: 'closed',
+        checked: true,
+        tags: [],
+        mentions: [],
+      },
+      {
+        id: '002',
+        idNumber: 2,
+        description: 'Task 2',
+        section: 'backlog',
+        checked: false,
+        tags: [],
+        mentions: [],
+      },
+    ];
+
+    const data: TaskData = {
+      tasks,
+      nextId: 3,
+    };
+
+    const result = formatMarkdown(data);
+    const lines = result.split('\n');
+    
+    // Check section order
+    const backlogIndex = lines.findIndex(l => l.includes('## backlog'));
+    const closedIndex = lines.findIndex(l => l.includes('## closed'));
+    
+    expect(backlogIndex).toBeLessThan(closedIndex);
+  });
+
+  it('should sort tasks by ID within sections', () => {
+    const tasks: Task[] = [
+      {
+        id: '003',
+        idNumber: 3,
+        description: 'Task 3',
+        section: 'backlog',
+        checked: false,
+        tags: [],
+        mentions: [],
+      },
+      {
+        id: '001',
+        idNumber: 1,
+        description: 'Task 1',
+        section: 'backlog',
+        checked: false,
+        tags: [],
+        mentions: [],
+      },
+      {
+        id: '002',
+        idNumber: 2,
+        description: 'Task 2',
+        section: 'backlog',
+        checked: false,
+        tags: [],
+        mentions: [],
+      },
+    ];
+
+    const data: TaskData = {
+      tasks,
+      nextId: 4,
+    };
+
+    const result = formatMarkdown(data);
+    const lines = result.split('\n');
+    const taskLines = lines.filter(l => l.includes('id:#'));
+    
+    expect(taskLines[0]).toContain('id:#001');
+    expect(taskLines[1]).toContain('id:#002');
+    expect(taskLines[2]).toContain('id:#003');
+  });
+});

@@ -1,0 +1,26 @@
+# Source files
+src/
+tsconfig.json
+vitest.config.ts
+
+# Tests
+tests/
+*.test.ts
+*.test.js
+
+# Development docs
+SPEC.md
+DECISIONS.md
+COMMAND_EXAMPLES.md
+
+# Development files
+TODO.md
+.vscode/
+.idea/
+
+# Build artifacts (already in .gitignore but explicit here)
+coverage/
+*.tsbuildinfo
+
+# CI/CD
+.github/
