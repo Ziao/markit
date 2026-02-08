@@ -82,14 +82,16 @@ markit a "Write tests" -f work.md
 
 ### `markit list [filter] [-f <file>]` (alias: `l`)
 
-List tasks, optionally filtered by section or tag.
+List tasks, optionally filtered by section, tag, or mention.
 
 ```bash
 markit list                    # All tasks
 markit l backlog              # Only backlog section
 markit l #urgent              # Tasks with #urgent tag
+markit l @ziao                # Tasks mentioning @ziao
 markit l progress -f work.md  # Progress section in work.md
 markit l #bug -f work.md      # Tasks with #bug tag in work.md
+markit l @john -f work.md     # Tasks mentioning @john in work.md
 ```
 
 ### `markit move <id> <section> [-f <file>]` (alias: `m`)
@@ -169,7 +171,7 @@ Tasks are stored in markdown files with fixed sections:
 - [ ] id:004 Refactor auth module #refactor
 
 ## closed
-- [x] id:005 Setup CI/CD pipeline #devops _done:2025-01-10
+- [x] id:005 Setup CI/CD pipeline #devops
 - [ ] id:006 Old feature idea #feature
 ```
 
@@ -194,7 +196,6 @@ Tasks are stored in markdown files with fixed sections:
 - **Tags**: `#tag1 #tag2`
 - **Mentions**: `@username`
 - **Due dates**: `due:YYYY-MM-DD`
-- **Done date**: `_done:YYYY-MM-DD` (auto-added when marked done)
 
 ## Multi-File Support
 
@@ -248,6 +249,12 @@ npm run build
 
 # Watch mode - rebuilds automatically on file changes
 npm run dev
+
+# Format code with Prettier
+npm run format
+
+# Check code formatting
+npm run format:check
 
 # Run tests
 npm test
