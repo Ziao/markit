@@ -1,16 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { promises as fs } from 'fs';
 import { join } from 'path';
-import {
-  initTaskFile,
-  addTask,
-  moveTask,
-  markDone,
-  markWontdo,
-  removeTask,
-  listTasks,
-  loadTasks,
-} from '../../src/lib/services/task-service.js';
+import { initTaskFile, addTask, moveTask, markDone, markWontdo, removeTask, listTasks, loadTasks } from '../../src/lib/services/task-service.js';
 import { SAMPLE_TODO_MD } from '../helpers/test-utils.js';
 
 const TEST_DIR = join(process.cwd(), 'test-temp');
@@ -32,11 +23,6 @@ describe('Task Service', () => {
       await fs.unlink(TEST_FILE);
     } catch {
       // Ignore if doesn't exist
-    }
-    try {
-      await fs.rmdir(TEST_DIR);
-    } catch {
-      // Ignore cleanup errors
     }
   });
 
@@ -107,7 +93,7 @@ describe('Task Service', () => {
       const task = tasks[0];
       expect(task.section).toBe('closed');
       expect(task.checked).toBe(true);
-      expect(task.doneDate).toBeDefined();
+      // doneDate removed - no longer set
     });
   });
 
@@ -123,7 +109,7 @@ describe('Task Service', () => {
       const task = tasks[0];
       expect(task.section).toBe('closed');
       expect(task.checked).toBe(false);
-      expect(task.doneDate).toBeUndefined();
+      // doneDate removed - no longer used
     });
   });
 
@@ -173,19 +159,19 @@ describe('Task Service', () => {
     });
 
     it('should throw error when moving non-existent task', async () => {
-      await expect(moveTask(TEST_FILE, '999', 'todo')).rejects.toThrow('Task ##999 not found');
+      await expect(moveTask(TEST_FILE, '999', 'todo')).rejects.toThrow('Task 999 not found');
     });
 
     it('should throw error when marking non-existent task as done', async () => {
-      await expect(markDone(TEST_FILE, '999')).rejects.toThrow('Task ##999 not found');
+      await expect(markDone(TEST_FILE, '999')).rejects.toThrow('Task 999 not found');
     });
 
     it('should throw error when marking non-existent task as wontdo', async () => {
-      await expect(markWontdo(TEST_FILE, '999')).rejects.toThrow('Task ##999 not found');
+      await expect(markWontdo(TEST_FILE, '999')).rejects.toThrow('Task 999 not found');
     });
 
     it('should throw error when removing non-existent task', async () => {
-      await expect(removeTask(TEST_FILE, '999')).rejects.toThrow('Task ##999 not found');
+      await expect(removeTask(TEST_FILE, '999')).rejects.toThrow('Task 999 not found');
     });
   });
 });

@@ -5,7 +5,7 @@ import { SAMPLE_TODO_MD } from '../helpers/test-utils.js';
 describe('Parser', () => {
   it('should parse simple task', () => {
     const markdown = `## backlog
-- [ ] id:#001 Task description
+- [ ] id:001 Task description
 `;
     const result = parseMarkdown(markdown);
     expect(result.tasks).toHaveLength(1);
@@ -17,7 +17,7 @@ describe('Parser', () => {
 
   it('should parse task with metadata', () => {
     const markdown = `## backlog
-- [ ] id:#001 Fix bug #urgent @john due:2025-01-15
+- [ ] id:001 Fix bug #urgent @john due:2025-01-15
 `;
     const result = parseMarkdown(markdown);
     expect(result.tasks[0].tags).toContain('urgent');
@@ -25,24 +25,40 @@ describe('Parser', () => {
     expect(result.tasks[0].dueDate).toBe('2025-01-15');
   });
 
-  it('should parse completed task with done date', () => {
+  it('should parse completed task', () => {
     const markdown = `## closed
-- [x] id:#001 Completed task _done:2025-01-10
+- [x] id:001 Completed task
 `;
     const result = parseMarkdown(markdown);
     expect(result.tasks[0].checked).toBe(true);
-    expect(result.tasks[0].doneDate).toBe('2025-01-10');
+  });
+
+  it('should parse tasks with IDs greater than 999', () => {
+    const markdown = `## backlog
+- [ ] id:999 Task 999
+- [ ] id:1000 Task 1000
+- [ ] id:1234 Task 1234
+`;
+    const result = parseMarkdown(markdown);
+    expect(result.tasks).toHaveLength(3);
+    expect(result.tasks[0].idNumber).toBe(999);
+    expect(result.tasks[0].id).toBe('999');
+    expect(result.tasks[1].idNumber).toBe(1000);
+    expect(result.tasks[1].id).toBe('1000');
+    expect(result.tasks[2].idNumber).toBe(1234);
+    expect(result.tasks[2].id).toBe('1234');
+    expect(result.nextId).toBe(1235);
   });
 
   it('should parse multiple sections', () => {
     const result = parseMarkdown(SAMPLE_TODO_MD);
     expect(result.tasks).toHaveLength(7);
-    
-    const backlog = result.tasks.filter(t => t.section === 'backlog');
-    const todo = result.tasks.filter(t => t.section === 'todo');
-    const progress = result.tasks.filter(t => t.section === 'progress');
-    const closed = result.tasks.filter(t => t.section === 'closed');
-    
+
+    const backlog = result.tasks.filter((t) => t.section === 'backlog');
+    const todo = result.tasks.filter((t) => t.section === 'todo');
+    const progress = result.tasks.filter((t) => t.section === 'progress');
+    const closed = result.tasks.filter((t) => t.section === 'closed');
+
     expect(backlog).toHaveLength(2);
     expect(todo).toHaveLength(1);
     expect(progress).toHaveLength(1);
@@ -58,7 +74,7 @@ describe('Parser', () => {
     const markdown = `## backlog
 
 ## todo
-- [ ] id:#001 Task
+- [ ] id:001 Task
 `;
     const result = parseMarkdown(markdown);
     expect(result.tasks).toHaveLength(1);
@@ -68,7 +84,7 @@ describe('Parser', () => {
   it('should skip tasks without IDs', () => {
     const markdown = `## backlog
 - [ ] Task without ID
-- [ ] id:#001 Task with ID
+- [ ] id:001 Task with ID
 `;
     const result = parseMarkdown(markdown);
     expect(result.tasks).toHaveLength(1);
@@ -76,9 +92,9 @@ describe('Parser', () => {
   });
 
   it('should skip tasks outside sections', () => {
-    const markdown = `- [ ] id:#001 Task outside section
+    const markdown = `- [ ] id:001 Task outside section
 ## backlog
-- [ ] id:#002 Task in section
+- [ ] id:002 Task in section
 `;
     const result = parseMarkdown(markdown);
     expect(result.tasks).toHaveLength(1);
@@ -87,7 +103,7 @@ describe('Parser', () => {
 
   it('should handle multiple tags and mentions', () => {
     const markdown = `## backlog
-- [ ] id:#001 Task #bug #urgent @john @jane due:2025-01-15
+- [ ] id:001 Task #bug #urgent @john @jane due:2025-01-15
 `;
     const result = parseMarkdown(markdown);
     expect(result.tasks[0].tags).toEqual(['bug', 'urgent']);
@@ -96,8 +112,8 @@ describe('Parser', () => {
 
   it('should skip malformed checkbox lines', () => {
     const markdown = `## backlog
-- [invalid] id:#001 Valid task
-- [ ] id:#002 Another valid task
+- [invalid] id:001 Valid task
+- [ ] id:002 Another valid task
 `;
     const result = parseMarkdown(markdown);
     // Only the valid checkbox task should be parsed
@@ -108,7 +124,7 @@ describe('Parser', () => {
   it('should skip lines that start with - but are not checkboxes', () => {
     const markdown = `## backlog
 - This is just a list item, not a task
-- [ ] id:#001 Valid task
+- [ ] id:001 Valid task
 `;
     const result = parseMarkdown(markdown);
     expect(result.tasks).toHaveLength(1);

@@ -23,21 +23,16 @@ describe('Wontdo Command Integration', () => {
     } catch {
       // Ignore
     }
-    try {
-      await fs.rmdir(TEST_DIR);
-    } catch {
-      // Ignore
-    }
   });
 
   it('should mark task as wontdo and move to closed', async () => {
     await markWontdo(TEST_FILE, '001');
-    
+
     const data = await loadTasks(TEST_FILE);
     const task = data.tasks[0];
-    
+
     expect(task.section).toBe('closed');
     expect(task.checked).toBe(false);
-    expect(task.doneDate).toBeUndefined();
+    // doneDate removed - no longer used
   });
 });

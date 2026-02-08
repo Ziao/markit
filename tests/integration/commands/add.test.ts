@@ -22,21 +22,16 @@ describe('Add Command Integration', () => {
     } catch {
       // Ignore
     }
-    try {
-      await fs.rmdir(TEST_DIR);
-    } catch {
-      // Ignore
-    }
   });
 
   it('should add task to backlog with sequential ID', async () => {
     const task = await addTask(TEST_FILE, 'Fix login bug');
-    
+
     expect(task.section).toBe('backlog');
     expect(task.id).toBe('001');
     expect(task.idNumber).toBe(1);
     expect(task.description).toBe('Fix login bug');
-    
+
     const data = await loadTasks(TEST_FILE);
     expect(data.tasks).toHaveLength(1);
     expect(data.nextId).toBe(2);
@@ -46,10 +41,10 @@ describe('Add Command Integration', () => {
     await addTask(TEST_FILE, 'Task 1');
     await addTask(TEST_FILE, 'Task 2');
     const task3 = await addTask(TEST_FILE, 'Task 3');
-    
+
     expect(task3.id).toBe('003');
     expect(task3.idNumber).toBe(3);
-    
+
     const data = await loadTasks(TEST_FILE);
     expect(data.tasks).toHaveLength(3);
     expect(data.nextId).toBe(4);

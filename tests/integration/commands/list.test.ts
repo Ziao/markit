@@ -25,11 +25,6 @@ describe('List Command Integration', () => {
     } catch {
       // Ignore
     }
-    try {
-      await fs.rmdir(TEST_DIR);
-    } catch {
-      // Ignore
-    }
   });
 
   it('should list all tasks', async () => {
@@ -41,7 +36,7 @@ describe('List Command Integration', () => {
     const backlogTasks = await listTasks(TEST_FILE, 'backlog');
     expect(backlogTasks).toHaveLength(1);
     expect(backlogTasks[0].section).toBe('backlog');
-    
+
     const todoTasks = await listTasks(TEST_FILE, 'todo');
     expect(todoTasks).toHaveLength(1);
     expect(todoTasks[0].section).toBe('todo');

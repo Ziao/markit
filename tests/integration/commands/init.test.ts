@@ -21,17 +21,12 @@ describe('Init Command Integration', () => {
     } catch {
       // Ignore
     }
-    try {
-      await fs.rmdir(TEST_DIR);
-    } catch {
-      // Ignore
-    }
   });
 
   it('should create file with all fixed sections', async () => {
     await initTaskFile(TEST_FILE);
     const content = await fs.readFile(TEST_FILE, 'utf-8');
-    
+
     expect(content).toContain('# Tasks');
     expect(content).toContain('## backlog');
     expect(content).toContain('## todo');
@@ -43,12 +38,12 @@ describe('Init Command Integration', () => {
     await initTaskFile(TEST_FILE);
     const content = await fs.readFile(TEST_FILE, 'utf-8');
     const lines = content.split('\n');
-    
-    const backlogIndex = lines.findIndex(l => l.includes('## backlog'));
-    const todoIndex = lines.findIndex(l => l.includes('## todo'));
-    const progressIndex = lines.findIndex(l => l.includes('## progress'));
-    const closedIndex = lines.findIndex(l => l.includes('## closed'));
-    
+
+    const backlogIndex = lines.findIndex((l) => l.includes('## backlog'));
+    const todoIndex = lines.findIndex((l) => l.includes('## todo'));
+    const progressIndex = lines.findIndex((l) => l.includes('## progress'));
+    const closedIndex = lines.findIndex((l) => l.includes('## closed'));
+
     expect(backlogIndex).toBeLessThan(todoIndex);
     expect(todoIndex).toBeLessThan(progressIndex);
     expect(progressIndex).toBeLessThan(closedIndex);

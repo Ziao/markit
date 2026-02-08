@@ -29,18 +29,19 @@ describe('Formatter', () => {
     };
 
     const result = formatMarkdown(data);
-    expect(result).toContain('- [ ] id:#001 Test task');
+    expect(result).toContain('- [ ] id:001 Test task');
     expect(result).toContain('## backlog');
   });
 
   it('should format task with metadata', () => {
+    // When tags are in description, they stay inline
     const task: Task = {
       id: '001',
       idNumber: 1,
-      description: 'Fix bug',
+      description: 'Fix bug #bug #urgent @john',
       section: 'backlog',
       checked: false,
-      tags: ['bug', 'urgent'],
+      tags: ['bug', 'urgent'], // Extracted for searching
       mentions: ['john'],
       dueDate: '2025-01-15',
     };
@@ -51,10 +52,12 @@ describe('Formatter', () => {
     };
 
     const result = formatMarkdown(data);
-    expect(result).toContain('id:#001 Fix bug #bug #urgent @john due:2025-01-15');
+    // Tags and mentions stay inline in description
+    expect(result).toContain('id:001 Fix bug #bug #urgent @john');
+    expect(result).toContain('due:2025-01-15');
   });
 
-  it('should format completed task with done date', () => {
+  it('should format completed task', () => {
     const task: Task = {
       id: '001',
       idNumber: 1,
@@ -63,7 +66,6 @@ describe('Formatter', () => {
       checked: true,
       tags: [],
       mentions: [],
-      doneDate: '2025-01-10',
     };
 
     const data: TaskData = {
@@ -72,7 +74,7 @@ describe('Formatter', () => {
     };
 
     const result = formatMarkdown(data);
-    expect(result).toContain('- [x] id:#001 Completed task _done:2025-01-10');
+    expect(result).toContain('- [x] id:001 Completed task');
   });
 
   it('should maintain section order', () => {
@@ -104,11 +106,11 @@ describe('Formatter', () => {
 
     const result = formatMarkdown(data);
     const lines = result.split('\n');
-    
+
     // Check section order
-    const backlogIndex = lines.findIndex(l => l.includes('## backlog'));
-    const closedIndex = lines.findIndex(l => l.includes('## closed'));
-    
+    const backlogIndex = lines.findIndex((l) => l.includes('## backlog'));
+    const closedIndex = lines.findIndex((l) => l.includes('## closed'));
+
     expect(backlogIndex).toBeLessThan(closedIndex);
   });
 
@@ -150,10 +152,52 @@ describe('Formatter', () => {
 
     const result = formatMarkdown(data);
     const lines = result.split('\n');
-    const taskLines = lines.filter(l => l.includes('id:#'));
-    
-    expect(taskLines[0]).toContain('id:#001');
-    expect(taskLines[1]).toContain('id:#002');
-    expect(taskLines[2]).toContain('id:#003');
+    const taskLines = lines.filter((l) => l.includes('id:'));
+
+    expect(taskLines[0]).toContain('id:001');
+    expect(taskLines[1]).toContain('id:002');
+    expect(taskLines[2]).toContain('id:003');
+  });
+
+  it('should format tasks with IDs greater than 999', () => {
+    const tasks: Task[] = [
+      {
+        id: '999',
+        idNumber: 999,
+        description: 'Task 999',
+        section: 'backlog',
+        checked: false,
+        tags: [],
+        mentions: [],
+      },
+      {
+        id: '1000',
+        idNumber: 1000,
+        description: 'Task 1000',
+        section: 'backlog',
+        checked: false,
+        tags: [],
+        mentions: [],
+      },
+      {
+        id: '1234',
+        idNumber: 1234,
+        description: 'Task 1234',
+        section: 'backlog',
+        checked: false,
+        tags: [],
+        mentions: [],
+      },
+    ];
+
+    const data: TaskData = {
+      tasks,
+      nextId: 1235,
+    };
+
+    const result = formatMarkdown(data);
+    expect(result).toContain('id:999');
+    expect(result).toContain('id:1000');
+    expect(result).toContain('id:1234');
   });
 });

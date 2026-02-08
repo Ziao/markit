@@ -23,18 +23,13 @@ describe('Move Command Integration', () => {
     } catch {
       // Ignore
     }
-    try {
-      await fs.rmdir(TEST_DIR);
-    } catch {
-      // Ignore
-    }
   });
 
   it('should move task between sections', async () => {
     await moveTask(TEST_FILE, '001', 'todo');
     const data = await loadTasks(TEST_FILE);
     expect(data.tasks[0].section).toBe('todo');
-    
+
     await moveTask(TEST_FILE, '001', 'progress');
     const data2 = await loadTasks(TEST_FILE);
     expect(data2.tasks[0].section).toBe('progress');

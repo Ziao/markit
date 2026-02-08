@@ -49,13 +49,13 @@ describe('File Manager', () => {
     it('should write content to file', async () => {
       const testPath = 'test-write.md';
       const content = 'Test content';
-      
+
       await writeMarkdownFile(testPath, content);
-      
+
       // Verify by reading it back
       const result = await readMarkdownFile(testPath);
       expect(result).toBe(content);
-      
+
       // Cleanup
       try {
         await fsPromises.unlink(testPath);

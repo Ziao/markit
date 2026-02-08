@@ -25,27 +25,22 @@ describe('Remove Command Integration', () => {
     } catch {
       // Ignore
     }
-    try {
-      await fs.rmdir(TEST_DIR);
-    } catch {
-      // Ignore
-    }
   });
 
   it('should remove task from file', async () => {
     await removeTask(TEST_FILE, '002');
-    
+
     const data = await loadTasks(TEST_FILE);
     expect(data.tasks).toHaveLength(2);
-    expect(data.tasks.find(t => t.idNumber === 2)).toBeUndefined();
+    expect(data.tasks.find((t) => t.idNumber === 2)).toBeUndefined();
   });
 
   it('should not affect other tasks', async () => {
     await removeTask(TEST_FILE, '001');
-    
+
     const data = await loadTasks(TEST_FILE);
     expect(data.tasks).toHaveLength(2);
-    expect(data.tasks.find(t => t.idNumber === 2)).toBeDefined();
-    expect(data.tasks.find(t => t.idNumber === 3)).toBeDefined();
+    expect(data.tasks.find((t) => t.idNumber === 2)).toBeDefined();
+    expect(data.tasks.find((t) => t.idNumber === 3)).toBeDefined();
   });
 });
