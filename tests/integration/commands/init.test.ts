@@ -7,45 +7,45 @@ const TEST_DIR = join(process.cwd(), 'test-temp');
 const TEST_FILE = join(TEST_DIR, 'test-init.md');
 
 describe('Init Command Integration', () => {
-  beforeEach(async () => {
-    try {
-      await fs.mkdir(TEST_DIR, { recursive: true });
-    } catch {
-      // Ignore
-    }
-  });
+    beforeEach(async () => {
+        try {
+            await fs.mkdir(TEST_DIR, { recursive: true });
+        } catch {
+            // Ignore
+        }
+    });
 
-  afterEach(async () => {
-    try {
-      await fs.unlink(TEST_FILE);
-    } catch {
-      // Ignore
-    }
-  });
+    afterEach(async () => {
+        try {
+            await fs.unlink(TEST_FILE);
+        } catch {
+            // Ignore
+        }
+    });
 
-  it('should create file with all fixed sections', async () => {
-    await initTaskFile(TEST_FILE);
-    const content = await fs.readFile(TEST_FILE, 'utf-8');
+    it('should create file with all fixed sections', async () => {
+        await initTaskFile(TEST_FILE);
+        const content = await fs.readFile(TEST_FILE, 'utf-8');
 
-    expect(content).toContain('# Tasks');
-    expect(content).toContain('## backlog');
-    expect(content).toContain('## todo');
-    expect(content).toContain('## progress');
-    expect(content).toContain('## closed');
-  });
+        expect(content).toContain('# Tasks');
+        expect(content).toContain('## backlog');
+        expect(content).toContain('## todo');
+        expect(content).toContain('## progress');
+        expect(content).toContain('## closed');
+    });
 
-  it('should create sections in correct order', async () => {
-    await initTaskFile(TEST_FILE);
-    const content = await fs.readFile(TEST_FILE, 'utf-8');
-    const lines = content.split('\n');
+    it('should create sections in correct order', async () => {
+        await initTaskFile(TEST_FILE);
+        const content = await fs.readFile(TEST_FILE, 'utf-8');
+        const lines = content.split('\n');
 
-    const backlogIndex = lines.findIndex((l) => l.includes('## backlog'));
-    const todoIndex = lines.findIndex((l) => l.includes('## todo'));
-    const progressIndex = lines.findIndex((l) => l.includes('## progress'));
-    const closedIndex = lines.findIndex((l) => l.includes('## closed'));
+        const backlogIndex = lines.findIndex(l => l.includes('## backlog'));
+        const todoIndex = lines.findIndex(l => l.includes('## todo'));
+        const progressIndex = lines.findIndex(l => l.includes('## progress'));
+        const closedIndex = lines.findIndex(l => l.includes('## closed'));
 
-    expect(backlogIndex).toBeLessThan(todoIndex);
-    expect(todoIndex).toBeLessThan(progressIndex);
-    expect(progressIndex).toBeLessThan(closedIndex);
-  });
+        expect(backlogIndex).toBeLessThan(todoIndex);
+        expect(todoIndex).toBeLessThan(progressIndex);
+        expect(progressIndex).toBeLessThan(closedIndex);
+    });
 });

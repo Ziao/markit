@@ -10,8 +10,8 @@ import { fs } from 'memfs';
  * Create a mock file system for testing
  */
 export function createMockFs(): typeof fs {
-  const volume = Volume.fromJSON({});
-  return createFsFromVolume(volume) as typeof fs;
+    const volume = Volume.fromJSON({});
+    return createFsFromVolume(volume) as typeof fs;
 }
 
 /**

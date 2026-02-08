@@ -42,8 +42,8 @@ export function parseMarkdown(markdown: string): TaskData {
         }
 
         existingIds.push(idNumber);
-        const descriptionWithMetadata = restOfLine.replace(/id:#?\d+\s*/, '').trim();
-        const { description, tags, mentions, dueDate, doneDate } = parseMetadata(descriptionWithMetadata);
+        const descriptionWithMetadata = restOfLine.replace(/id:\d+\s*/, '').trim();
+        const { description, tags, mentions, dueDate } = parseMetadata(descriptionWithMetadata);
         const task: Task = {
             id: String(idNumber).padStart(3, '0'),
             idNumber,
@@ -53,8 +53,7 @@ export function parseMarkdown(markdown: string): TaskData {
             tags,
             mentions,
             dueDate,
-            doneDate,
-            lineNumber
+            lineNumber,
         };
 
         tasks.push(task);
@@ -64,17 +63,15 @@ export function parseMarkdown(markdown: string): TaskData {
     return { tasks, nextId };
 }
 
-function parseMetadata(line: string): {
+export function parseMetadata(line: string): {
     description: string;
     tags: string[];
     mentions: string[];
     dueDate?: string;
-    doneDate?: string;
 } {
     const tags: string[] = [];
     const mentions: string[] = [];
     let dueDate: string | undefined;
-    let doneDate: string | undefined;
 
     const tagRegex = /#(\w+)/g;
     let match;
@@ -92,18 +89,32 @@ function parseMetadata(line: string): {
         dueDate = dueMatch[1];
     }
 
-    const doneMatch = line.match(/_done:(\d{4}-\d{2}-\d{2})/);
-    if (doneMatch) {
-        doneDate = doneMatch[1];
-    }
-
+    // Remove only metadata that should be extracted (due dates)
+    // Keep tags and mentions inline in description - they stay where they are
     let description = line
-        .replace(/#\w+/g, '')
-        .replace(/@\w+/g, '')
         .replace(/due:\d{4}-\d{2}-\d{2}/g, '')
-        .replace(/_done:\d{4}-\d{2}-\d{2}/g, '')
         .trim()
         .replace(/\s+/g, ' ');
 
-    return { description, tags, mentions, dueDate, doneDate };
+    // Remove duplicate mentions from description (keep first occurrence of each)
+    const seenMentions = new Set<string>();
+    for (const mention of mentions) {
+        if (seenMentions.has(mention)) {
+            // Remove all but the first occurrence of this mention
+            let firstOccurrence = true;
+            description = description.replace(new RegExp(`@${mention}\\b`, 'g'), match => {
+                if (firstOccurrence) {
+                    firstOccurrence = false;
+                    return match; // Keep first occurrence
+                }
+                return ''; // Remove duplicate
+            });
+        } else {
+            seenMentions.add(mention);
+        }
+    }
+    // Clean up extra spaces
+    description = description.replace(/\s+/g, ' ').trim();
+
+    return { description, tags, mentions, dueDate };
 }

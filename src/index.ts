@@ -24,10 +24,7 @@ const version = packageJson.version;
 
 const program = new Command();
 
-program
-  .name('markit')
-  .description('A CLI task manager that stores tasks in markdown files')
-  .version(version);
+program.name('markit').description('A CLI task manager that stores tasks in markdown files').version(version);
 
 program.addCommand(initCommand());
 program.addCommand(addCommand());
@@ -40,9 +37,9 @@ program.addCommand(removeCommand());
 program.addCommand(syncCommand());
 
 program.configureOutput({
-  writeErr: (str) => {
-    process.stderr.write(chalk.red(str));
-  }
+    writeErr: str => {
+        process.stderr.write(chalk.red(str));
+    },
 });
 
 program.parse();

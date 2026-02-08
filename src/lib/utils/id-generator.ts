@@ -17,7 +17,7 @@ export function parseId(idString: string): number {
 }
 
 export function extractIdFromLine(line: string): number | undefined {
-    const match = line.match(/id:#?(\d+)/);
+    const match = line.match(/id:(\d+)/);
     if (match) {
         const idNumber = parseInt(match[1], 10);
         if (!isNaN(idNumber) && idNumber >= 1) {

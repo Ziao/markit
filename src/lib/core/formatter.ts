@@ -1,5 +1,4 @@
 import { Task, TaskData, FIXED_SECTIONS } from './task.js';
-import { formatId } from '../utils/id-generator.js';
 
 export function formatMarkdown(data: TaskData): string {
     const lines: string[] = [];
@@ -28,23 +27,15 @@ function formatTaskLine(task: Task): string {
     const parts: string[] = [];
     const checkbox = task.checked ? '[x]' : '[ ]';
     parts.push(`- ${checkbox}`);
-    parts.push(`id:${formatId(task.idNumber)}`);
+    const idString = String(task.idNumber).padStart(3, '0');
+    parts.push(`id:${idString}`);
+
+    // Description already contains tags and mentions inline, so use it as-is
     parts.push(task.description);
 
-    for (const tag of task.tags) {
-        parts.push(`#${tag}`);
-    }
-
-    for (const mention of task.mentions) {
-        parts.push(`@${mention}`);
-    }
-
+    // Add due date after description
     if (task.dueDate) {
         parts.push(`due:${task.dueDate}`);
-    }
-
-    if (task.doneDate) {
-        parts.push(`_done:${task.doneDate}`);
     }
 
     return parts.join(' ');

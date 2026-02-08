@@ -9,7 +9,7 @@ export function initCommand(): Command {
         .alias('i')
         .description('Initialize a new task file with fixed sections')
         .option('-f, --file <file>', 'specify task file (default: TODO.md)')
-        .action(async (options) => {
+        .action(async options => {
             try {
                 const filePath = options.file;
                 await initTaskFile(filePath);
