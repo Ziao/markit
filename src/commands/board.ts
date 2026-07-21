@@ -13,7 +13,7 @@ export function boardCommand(): Command {
         .alias('b')
         .description('Display tasks in a board/table view (sections as columns)')
         .option('-f, --file <file>', 'specify task file (default: TODO.md)')
-        .action(async (options) => {
+        .action(async options => {
             try {
                 const filePath = options.file;
                 const tasks = await listTasks(filePath);

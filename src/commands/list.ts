@@ -115,4 +115,3 @@ function printTask(task: Task) {
 
     console.log(line);
 }
-
