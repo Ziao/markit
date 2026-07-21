@@ -3,6 +3,7 @@ import chalk from 'chalk';
 import { listTasks } from '../lib/services/task-service.js';
 import { Section, FIXED_SECTIONS } from '../lib/core/task.js';
 import { formatId } from '../lib/utils/id-generator.js';
+import { Task } from '../lib/core/task.js';
 
 export function listCommand(): Command {
     const command = new Command('list');
@@ -55,8 +56,15 @@ export function listCommand(): Command {
                     return;
                 }
 
-                // Group by section if no section filter (but tag filter may be active)
-                if (!sectionFilter) {
+                // Always use list format for list command
+                if (sectionFilter) {
+                    // Single section
+                    console.log(chalk.bold(`\n## ${sectionFilter}`));
+                    for (const task of tasks) {
+                        printTask(task);
+                    }
+                } else {
+                    // Group by section
                     for (const section of FIXED_SECTIONS) {
                         const sectionTasks = tasks.filter(t => t.section === section);
                         if (sectionTasks.length > 0) {
@@ -65,12 +73,6 @@ export function listCommand(): Command {
                                 printTask(task);
                             }
                         }
-                    }
-                } else {
-                    // Single section
-                    console.log(chalk.bold(`\n## ${sectionFilter}`));
-                    for (const task of tasks) {
-                        printTask(task);
                     }
                 }
             } catch (error: any) {
@@ -82,7 +84,7 @@ export function listCommand(): Command {
     return command;
 }
 
-function printTask(task: any) {
+function printTask(task: Task) {
     const id = formatId(task.idNumber);
     const checkbox = task.checked ? chalk.green('[x]') : chalk.gray('[ ]');
     const status = task.section === 'closed' ? (task.checked ? chalk.green('DONE') : chalk.yellow('WONTDO')) : '';
@@ -113,3 +115,4 @@ function printTask(task: any) {
 
     console.log(line);
 }
+

@@ -1,7 +1,7 @@
 import { Task, TaskData, Section, isValidSection } from '../core/task.js';
 import { parseMarkdown, parseMetadata } from '../core/parser.js';
 import { formatMarkdown, formatEmptyFile } from '../core/formatter.js';
-import { readMarkdownFile, writeMarkdownFile, fileExists } from './file-manager.js';
+import { readMarkdownFile, writeMarkdownFile, fileExists, getFilePath } from './file-manager.js';
 import { parseId } from '../utils/id-generator.js';
 
 export async function loadTasks(filePath?: string): Promise<TaskData> {
@@ -114,6 +114,35 @@ export async function removeTask(filePath: string | undefined, taskId: string): 
     await saveTasks(filePath, data);
 }
 
+/**
+ * Replace a task's description (and inline metadata: tags, mentions, due date).
+ * Section and checked state are left unchanged.
+ */
+export async function editTask(filePath: string | undefined, taskId: string, description: string): Promise<Task> {
+    const trimmed = description.trim();
+    if (!trimmed) {
+        throw new Error('Description cannot be empty');
+    }
+
+    const data = await loadTasks(filePath);
+    const idNumber = parseId(taskId);
+
+    const task = data.tasks.find(t => t.idNumber === idNumber);
+    if (!task) {
+        throw new Error(`Task ${String(idNumber).padStart(3, '0')} not found`);
+    }
+
+    // Re-parse tags/mentions/due from the new description; tags & mentions stay inline
+    const { description: cleanedDescription, tags, mentions, dueDate } = parseMetadata(trimmed);
+    task.description = cleanedDescription;
+    task.tags = tags;
+    task.mentions = mentions;
+    task.dueDate = dueDate;
+
+    await saveTasks(filePath, data);
+    return task;
+}
+
 export async function listTasks(
     filePath: string | undefined,
     section?: Section,
@@ -150,4 +179,17 @@ export async function initTaskFile(filePath?: string): Promise<void> {
 
     const content = formatEmptyFile();
     await writeMarkdownFile(filePath, content);
+}
+
+/**
+ * Parse the task file and write it back so sections/tasks are normalized and ordered.
+ */
+export async function cleanTaskFile(filePath?: string): Promise<void> {
+    const exists = await fileExists(filePath);
+    if (!exists) {
+        throw new Error(`File not found: ${getFilePath(filePath)}. Use 'markit init' to create it.`);
+    }
+
+    const data = await loadTasks(filePath);
+    await saveTasks(filePath, data);
 }

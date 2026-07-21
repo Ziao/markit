@@ -80,6 +80,15 @@ markit add "Fix login bug"
 markit a "Write tests" -f work.md
 ```
 
+### `markit edit <id> "description" [-f <file>]` (alias: `e`)
+
+Replace a task's description (tags, mentions, and due date included). Section and status are unchanged.
+
+```bash
+markit edit 001 "Fix login bug on Safari #bug"
+markit e 001 "Rewrite API docs #docs @ziao" -f work.md
+```
+
 ### `markit list [filter] [-f <file>]` (alias: `l`)
 
 List tasks, optionally filtered by section, tag, or mention.
@@ -137,6 +146,15 @@ Remove a task from the file.
 ```bash
 markit remove 001
 markit r 001
+```
+
+### `markit clean [-f <file>]` (alias: `c`)
+
+Reformat the task file by parsing and writing it again. Ensures sections are in the right order and tasks are sorted by ID within each section.
+
+```bash
+markit clean
+markit c -f work.md
 ```
 
 ### `markit sync [-f <file>]` (alias: `s`)

@@ -7,12 +7,15 @@ import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 import { initCommand } from './commands/init.js';
 import { addCommand } from './commands/add.js';
+import { editCommand } from './commands/edit.js';
 import { listCommand } from './commands/list.js';
+import { boardCommand } from './commands/board.js';
 import { moveCommand } from './commands/move.js';
 import { progressCommand } from './commands/progress.js';
 import { doneCommand } from './commands/done.js';
 import { wontdoCommand } from './commands/wontdo.js';
 import { removeCommand } from './commands/remove.js';
+import { cleanCommand } from './commands/clean.js';
 import { syncCommand } from './commands/sync.js';
 
 // Get version from package.json
@@ -28,12 +31,15 @@ program.name('markit').description('A CLI task manager that stores tasks in mark
 
 program.addCommand(initCommand());
 program.addCommand(addCommand());
+program.addCommand(editCommand());
 program.addCommand(listCommand());
+program.addCommand(boardCommand());
 program.addCommand(moveCommand());
 program.addCommand(progressCommand());
 program.addCommand(doneCommand());
 program.addCommand(wontdoCommand());
 program.addCommand(removeCommand());
+program.addCommand(cleanCommand());
 program.addCommand(syncCommand());
 
 program.configureOutput({
